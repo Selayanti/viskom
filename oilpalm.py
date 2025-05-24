@@ -68,7 +68,7 @@ if "camera_image" not in st.session_state:
     st.session_state["camera_image"] = ""
 
 # Judul
-st.title("📷 Deteksi dan Klasifikasi Kematangan Buah Sawit")
+st.title("📷 Deteksi dan Klasifikasi Kematangan Buah Sawit HAWA TERCIPTA DI DUNIA")
 st.markdown("Pilih metode input gambar:")
 option = st.radio("", ["Upload Gambar", "Gunakan Kamera"])
 image = None
