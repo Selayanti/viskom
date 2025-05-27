@@ -85,15 +85,6 @@ with st.sidebar:
         camera_photo = st.camera_input("")
         if camera_photo is not None:
             image = Image.open(camera_photo)
-            
-    st.markdown(
-        """
-        <div style="margin-top:20px;">
-            <h4>Pilih Upload Gambar:</h4>
-        </div>
-        """, 
-        unsafe_allow_html=True
-    )
 
 
 # Judul dan deskripsi
