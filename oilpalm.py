@@ -58,7 +58,6 @@ def draw_results(image, results):
     return Image.fromarray(img), class_counts
 
 # Sidebar
-# Sidebar
 with st.sidebar:
     st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
     st.image("logo-saraswanti.png", width=150)
@@ -72,7 +71,6 @@ with st.sidebar:
         """, 
         unsafe_allow_html=True
     )
-
     image = None
     option = st.radio("", ["Upload Gambar", "Gunakan Kamera"])
 
@@ -81,6 +79,12 @@ with st.sidebar:
         uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"])
         if uploaded_file:
             image = Image.open(uploaded_file)
+            
+    elif option == "Gunakan Kamera":
+        st.markdown("<p style='font-size:16px; font-weight:bold;'>Ambil gambar dengan kamera</p>", unsafe_allow_html=True)
+        camera_photo = st.camera_input("")
+        if camera_photo is not None:
+            image = Image.open(camera_photo)
             
     st.markdown(
         """
@@ -91,11 +95,6 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-    elif option == "Gunakan Kamera":
-        st.markdown("<p style='font-size:16px; font-weight:bold;'>Ambil gambar dengan kamera</p>", unsafe_allow_html=True)
-        camera_photo = st.camera_input("")
-        if camera_photo is not None:
-            image = Image.open(camera_photo)
 
 # Judul dan deskripsi
 st.markdown("<h1 style='text-align:center;'>🌴 Deteksi dan Klasifikasi Kematangan Buah Sawit</h1>", unsafe_allow_html=True)
