@@ -94,7 +94,7 @@ with st.sidebar:
             image = Image.open(camera_photo)
 
     # Created by section
-    profile_img = Image.open("foto.jpg")
+    profile_img = Image.open("foto1.jpg")
     st.markdown(
         f"""
         <style>
