@@ -71,8 +71,9 @@ with st.sidebar:
             image = Image.open(uploaded_file)
 
     elif option == "Gunakan Kamera":
-        st.markdown("### Kamera Belakang (Environment)")
-        st.warning("Fitur kamera akan segera hadir...")  # Placeholder
+        camera_photo = st.camera_input("Ambil gambar dengan kamera")
+        if camera_photo is not None:
+            image = Image.open(camera_photo)
 
 # Judul dan deskripsi
 st.markdown("<h1 style='text-align:center;'>🌴 Deteksi dan Klasifikasi Kematangan Buah Sawit</h1>", unsafe_allow_html=True)
@@ -117,4 +118,4 @@ if image:
             mime="image/png"
         )
 else:
-    st.info("Silakan unggah gambar atau gunakan kamera untuk memulai deteksi.")
+    st.info("Silakan unggah gambar atau ambil foto dengan kamera untuk memulai deteksi.")
