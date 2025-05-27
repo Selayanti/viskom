@@ -1,6 +1,5 @@
 import streamlit as st
 from PIL import Image
-import cv2
 import numpy as np
 from collections import Counter
 from ultralytics import YOLO
@@ -8,7 +7,6 @@ from supervision import BoxAnnotator, LabelAnnotator, Color, Detections
 from io import BytesIO
 import base64
 
-# Konfigurasi halaman
 st.set_page_config(page_title="Deteksi Buah Sawit", layout="wide")
 
 def image_to_base64(img: Image.Image) -> str:
@@ -62,6 +60,8 @@ def draw_results(image, results):
 
     return Image.fromarray(img), class_counts
 
+profile_img = Image.open("foto.png")
+
 with st.sidebar:
     st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
     st.image("logo-saraswanti.png", width=150)
@@ -84,11 +84,46 @@ with st.sidebar:
         if uploaded_file:
             image = Image.open(uploaded_file)
 
+            # Tambahkan foto profil dan teks CREATED BY di bawah uploader, rata tengah kecil
+            st.markdown(
+                f"""
+                <style>
+                    .created-by-container {{
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
+                        margin-top: 15px;
+                        margin-bottom: 30px;
+                    }}
+                    .created-by-img {{
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        border: 2px solid #444;
+                        object-fit: cover;
+                    }}
+                    .created-by-text {{
+                        font-size: 14px;
+                        color: #555;
+                        font-style: italic;
+                        user-select: none;
+                    }}
+                </style>
+                <div class="created-by-container">
+                    <img class="created-by-img" src="data:image/png;base64,{image_to_base64(profile_img)}" alt="Profil" />
+                    <div class="created-by-text">Created by : hawa tercipta di dunia</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
     elif option == "Gunakan Kamera":
         st.markdown("<p style='font-size:16px; font-weight:bold; margin-bottom: 5px;'>Ambil gambar dengan kamera</p>", unsafe_allow_html=True)
         camera_photo = st.camera_input("")
         if camera_photo is not None:
             image = Image.open(camera_photo)
+
 
 st.markdown("<h1 style='text-align:center;'>🌴 Deteksi dan Klasifikasi Kematangan Buah Sawit</h1>", unsafe_allow_html=True)
 
@@ -101,9 +136,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("<div style='margin-top:30px;'></div>", unsafe_allow_html=True)
-
-# Load gambar profil lokal (pastikan file 'foto.png' ada di folder yang sama)
-profile_img = Image.open("foto.png")
 
 if image:
     with st.spinner("🔍 Memproses gambar..."):
@@ -119,44 +151,6 @@ if image:
         with col2:
             st.markdown("### 📊 Hasil Deteksi")
             st.image(result_img, use_container_width=True)
-
-            # Embed gambar profil dan teks "Created by"
-            st.markdown(
-                f"""
-                <style>
-                .profile-container {{
-                    position: relative;
-                    width: 100%;
-                    height: 150px;
-                    margin-top: 10px;
-                }}
-                .profile-img {{
-                    position: absolute;
-                    bottom: 10px;
-                    right: 10px;
-                    width: 60px;
-                    height: 60px;
-                    border-radius: 50%;
-                    border: 2px solid #444;
-                    object-fit: cover;
-                }}
-                .profile-text {{
-                    position: absolute;
-                    bottom: 20px;
-                    right: 80px;
-                    font-size: 12px;
-                    color: #666;
-                    font-style: italic;
-                    user-select: none;
-                }}
-                </style>
-                <div class="profile-container">
-                    <img class="profile-img" src="data:image/png;base64,{image_to_base64(profile_img)}" />
-                    <div class="profile-text">Created by : hawa tercipta di dunia</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
 
         st.subheader("Jumlah Objek Terdeteksi:")
         for name, count in class_counts.items():
