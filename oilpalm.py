@@ -73,6 +73,15 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
+    st.markdown(
+        """
+        <div style="margin-top:20px;">
+            <h4>Pilih Upload Gambar:</h4>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
+
     image = None
     option = st.radio("", ["Upload Gambar", "Gunakan Kamera"])
 
