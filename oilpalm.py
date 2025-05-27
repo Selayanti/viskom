@@ -73,15 +73,6 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-    st.markdown(
-        """
-        <div style="margin-top:20px;">
-            <h4>Pilih Upload Gambar:</h4>
-        </div>
-        """, 
-        unsafe_allow_html=True
-    )
-
     image = None
     option = st.radio("", ["Upload Gambar", "Gunakan Kamera"])
 
@@ -90,6 +81,15 @@ with st.sidebar:
         uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"])
         if uploaded_file:
             image = Image.open(uploaded_file)
+            
+    st.markdown(
+        """
+        <div style="margin-top:20px;">
+            <h4>Pilih Upload Gambar:</h4>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
 
     elif option == "Gunakan Kamera":
         st.markdown("<p style='font-size:16px; font-weight:bold;'>Ambil gambar dengan kamera</p>", unsafe_allow_html=True)
