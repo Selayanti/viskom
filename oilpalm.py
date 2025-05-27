@@ -14,7 +14,7 @@ st.set_page_config(page_title="Deteksi Buah Sawit", layout="wide")
 # === Load model YOLO ===
 @st.cache_resource
 def load_model():
-    return YOLO("best.pt")  # ganti path model Anda
+    return YOLO("best.pt")  # ganti dengan path model Anda
 
 model = load_model()
 
@@ -131,13 +131,20 @@ with st.sidebar:
 st.title("📷 Deteksi dan Klasifikasi Kematangan Buah Sawit")
 
 if image:
-    st.image(image, caption="🖼️ Gambar Input", use_container_width=True)
-
     with st.spinner("🔍 Memproses gambar..."):
         results = model(image)
         result_img, class_counts = draw_results(image, results)
 
-        st.image(result_img, caption="📊 Hasil Deteksi", use_container_width=True)
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("### 🖼️ Gambar Input")
+            st.image(image, use_container_width=True)
+
+        with col2:
+            st.markdown("### 📊 Hasil Deteksi")
+            st.image(result_img, use_container_width=True)
+
         st.subheader("Jumlah Objek Terdeteksi:")
         for name, count in class_counts.items():
             st.write(f"- **{name}**: {count}")
