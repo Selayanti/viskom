@@ -131,4 +131,5 @@ if image:
             mime="image/png"
         )
 else:
+    st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
     st.info("Silakan unggah gambar atau ambil foto dengan kamera untuk memulai deteksi.")
