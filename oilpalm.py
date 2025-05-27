@@ -1,27 +1,23 @@
 import streamlit as st
 from PIL import Image
-import requests
-from io import BytesIO
 import cv2
 import numpy as np
 from collections import Counter
 from ultralytics import YOLO
 from supervision import BoxAnnotator, LabelAnnotator, Color, Detections
+from io import BytesIO
 
+# Konfigurasi halaman
 st.set_page_config(page_title="Deteksi Buah Sawit", layout="wide")
-
-# Load gambar header dari GitHub
-header_url = "Buah-Kelapa-Sawit.jpg"  # Ganti dengan URL asli file di GitHub kamu
-response = requests.get(header_url)
-header_img = Image.open(BytesIO(response.content))
 
 # Load model YOLO
 @st.cache_resource
 def load_model():
-    return YOLO("best.pt")  # path model
+    return YOLO("best.pt")  # Ganti dengan path model kamu
 
 model = load_model()
 
+# Warna label
 label_to_color = {
     "Masak": Color.RED,
     "Mengkal": Color.YELLOW,
@@ -29,6 +25,7 @@ label_to_color = {
 }
 label_annotator = LabelAnnotator()
 
+# Fungsi anotasi
 def draw_results(image, results):
     img = np.array(image.convert("RGB"))
     class_counts = Counter()
@@ -75,24 +72,18 @@ with st.sidebar:
 
     elif option == "Gunakan Kamera":
         st.markdown("### Kamera Belakang (Environment)")
-        st.warning("Fitur kamera akan segera hadir...")  # Sementara placeholder
+        st.warning("Fitur kamera akan segera hadir...")  # Placeholder
 
-# Header gambar dan deskripsi
-st.image(header_img, use_column_width=True)
-st.markdown(
-    """
-    <h2 style="text-align:center; color:#2E8B57;">Proyek Deteksi dan Klasifikasi Kematangan Buah Kelapa Sawit</h2>
-    <p style="text-align:center; font-size:16px; max-width:800px; margin:auto;">
-        Sistem ini menggunakan teknologi YOLO untuk mendeteksi dan mengklasifikasikan kematangan buah kelapa sawit 
-        secara otomatis berdasarkan gambar input. Dengan deteksi yang akurat, diharapkan dapat membantu dalam 
-        pengelolaan perkebunan kelapa sawit yang lebih efisien dan hasil panen yang optimal.
-    </p>
-    """,
-    unsafe_allow_html=True
-)
+# Judul dan deskripsi
+st.markdown("<h1 style='text-align:center;'>🌴 Deteksi dan Klasifikasi Kematangan Buah Sawit</h1>", unsafe_allow_html=True)
 
-# Judul utama dengan emoji pohon sawit
-st.title("🌴 Deteksi dan Klasifikasi Kematangan Buah Sawit")
+st.markdown("""
+<div style="text-align:center; font-size:16px; max-width:800px; margin:auto;">
+    Sistem ini menggunakan teknologi YOLO untuk mendeteksi dan mengklasifikasikan kematangan buah kelapa sawit 
+    secara otomatis berdasarkan gambar input. Dengan deteksi yang akurat, diharapkan dapat membantu dalam 
+    pengelolaan perkebunan kelapa sawit yang lebih efisien dan hasil panen yang optimal.
+</div>
+""", unsafe_allow_html=True)
 
 # Jika ada gambar input
 if image:
@@ -114,6 +105,7 @@ if image:
         for name, count in class_counts.items():
             st.write(f"- **{name}**: {count}")
 
+        # Tombol download hasil
         buffered = BytesIO()
         result_img.save(buffered, format="PNG")
         img_bytes = buffered.getvalue()
