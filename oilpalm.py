@@ -1,5 +1,6 @@
 import streamlit as st
 from PIL import Image
+import cv2
 import numpy as np
 from collections import Counter
 from ultralytics import YOLO
@@ -7,21 +8,23 @@ from supervision import BoxAnnotator, LabelAnnotator, Color, Detections
 from io import BytesIO
 import base64
 
+# Konversi gambar ke base64 untuk dimasukkan ke dalam HTML
+def image_to_base64(image: Image.Image):
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode()
+
+# Konfigurasi halaman
 st.set_page_config(page_title="Deteksi Buah Sawit", layout="wide")
 
-def image_to_base64(img: Image.Image) -> str:
-    buffered = BytesIO()
-    img.save(buffered, format="PNG")
-    img_bytes = buffered.getvalue()
-    img_b64 = base64.b64encode(img_bytes).decode()
-    return img_b64
-
+# Load model YOLO
 @st.cache_resource
 def load_model():
     return YOLO("best.pt")  # Ganti dengan path model kamu
 
 model = load_model()
 
+# Warna label
 label_to_color = {
     "Masak": Color.RED,
     "Mengkal": Color.YELLOW,
@@ -29,6 +32,7 @@ label_to_color = {
 }
 label_annotator = LabelAnnotator()
 
+# Fungsi anotasi
 def draw_results(image, results):
     img = np.array(image.convert("RGB"))
     class_counts = Counter()
@@ -60,13 +64,12 @@ def draw_results(image, results):
 
     return Image.fromarray(img), class_counts
 
-profile_img = Image.open("foto.png")
-
+# Sidebar
 with st.sidebar:
     st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
     st.image("logo-saraswanti.png", width=150)
     st.markdown("</div>", unsafe_allow_html=True)
-    
+
     st.markdown(
         """
         <h4 style='margin-bottom: 5px;'>Pilih metode input gambar:</h4>
@@ -84,47 +87,48 @@ with st.sidebar:
         if uploaded_file:
             image = Image.open(uploaded_file)
 
-            # Tambahkan foto profil dan teks CREATED BY di bawah uploader, rata tengah kecil
-            st.markdown(
-                f"""
-                <style>
-                    .created-by-container {{
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 10px;
-                        margin-top: 15px;
-                        margin-bottom: 30px;
-                    }}
-                    .created-by-img {{
-                        width: 40px;
-                        height: 40px;
-                        border-radius: 50%;
-                        border: 2px solid #444;
-                        object-fit: cover;
-                    }}
-                    .created-by-text {{
-                        font-size: 14px;
-                        color: #555;
-                        font-style: italic;
-                        user-select: none;
-                    }}
-                </style>
-                <div class="created-by-container">
-                    <img class="created-by-img" src="data:image/png;base64,{image_to_base64(profile_img)}" alt="Profil" />
-                    <div class="created-by-text">Created by : hawa tercipta di dunia</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
     elif option == "Gunakan Kamera":
         st.markdown("<p style='font-size:16px; font-weight:bold; margin-bottom: 5px;'>Ambil gambar dengan kamera</p>", unsafe_allow_html=True)
         camera_photo = st.camera_input("")
         if camera_photo is not None:
             image = Image.open(camera_photo)
 
+    # Created by section
+    profile_img = Image.open("foto.png")
+    st.markdown(
+        f"""
+        <style>
+            .created-by-container {{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 15px;
+                margin-bottom: 30px;
+            }}
+            .created-by-img {{
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                border: 2px solid #444;
+                object-fit: cover;
+            }}
+            .created-by-text {{
+                font-size: 14px;
+                color: #555;
+                font-style: italic;
+                user-select: none;
+            }}
+        </style>
+        <div class="created-by-container">
+            <img class="created-by-img" src="data:image/png;base64,{image_to_base64(profile_img)}" alt="Profil" />
+            <div class="created-by-text">Created by : hawa tercipta di dunia</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
+# Judul dan deskripsi
 st.markdown("<h1 style='text-align:center;'>🌴 Deteksi dan Klasifikasi Kematangan Buah Sawit</h1>", unsafe_allow_html=True)
 
 st.markdown("""
@@ -135,8 +139,10 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# Tambahkan jarak sebelum hasil deteksi
 st.markdown("<div style='margin-top:30px;'></div>", unsafe_allow_html=True)
 
+# Jika ada gambar input
 if image:
     with st.spinner("🔍 Memproses gambar..."):
         results = model(image)
@@ -156,6 +162,7 @@ if image:
         for name, count in class_counts.items():
             st.write(f"- **{name}**: {count}")
 
+        # Tombol download hasil
         buffered = BytesIO()
         result_img.save(buffered, format="PNG")
         img_bytes = buffered.getvalue()
@@ -167,6 +174,7 @@ if image:
             mime="image/png"
         )
 
+# Jika belum ada gambar input, beri jarak dan tampilkan info
 else:
     st.markdown("<div style='margin-top:30px;'></div>", unsafe_allow_html=True)
     st.info("Silakan unggah gambar atau ambil foto dengan kamera untuk memulai deteksi.")
