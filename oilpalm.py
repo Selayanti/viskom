@@ -59,33 +59,36 @@ def draw_results(image, results):
 
 # Sidebar
 with st.sidebar:
-    st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
-    st.image("logo-saraswanti.png", width=150)
-    st.markdown("</div>", unsafe_allow_html=True)
-    
+    # Logo dipusatkan di sidebar
     st.markdown(
         """
-        <div style="margin-top:20px;">
-            <h4>Pilih metode input gambar:</h4>
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <img src="logo-saraswanti.png" width="150">
         </div>
-        """, 
+        """,
         unsafe_allow_html=True
     )
 
-    image = None
+    # Judul metode input
+    st.markdown("### Pilih metode input gambar:")
+
+    # Pilihan input
     option = st.radio("", ["Upload Gambar", "Gunakan Kamera"])
 
+    image = None
+
+    # Input gambar
     if option == "Upload Gambar":
-        st.markdown("<p style='font-size:16px; font-weight:bold;'>Unggah gambar</p>", unsafe_allow_html=True)
+        st.markdown("#### 📤 Unggah Gambar")  # Font lebih besar dari biasa
         uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"])
         if uploaded_file:
             image = Image.open(uploaded_file)
 
     elif option == "Gunakan Kamera":
-        st.markdown("<p style='font-size:16px; font-weight:bold;'>Ambil gambar dengan kamera</p>", unsafe_allow_html=True)
-        camera_photo = st.camera_input("")
-        if camera_photo is not None:
-            image = Image.open(camera_photo)
+        st.markdown("### Kamera")
+        image = st.camera_input("Ambil gambar")
+        if image:
+            image = Image.open(image)
 
 # Judul dan deskripsi
 st.markdown("<h1 style='text-align:center;'>🌴 Deteksi dan Klasifikasi Kematangan Buah Sawit</h1>", unsafe_allow_html=True)
