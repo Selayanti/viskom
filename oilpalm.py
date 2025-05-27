@@ -1,3 +1,85 @@
+import streamlit as st
+import cv2
+import numpy as np
+from PIL import Image
+from collections import Counter
+import base64
+from io import BytesIO
+from ultralytics import YOLO
+from supervision import BoxAnnotator, LabelAnnotator, Color, Detections
+
+# Konfigurasi halaman
+st.set_page_config(page_title="Deteksi Buah Sawit", layout="wide")
+
+# Load model
+@st.cache_resource
+def load_model():
+    return YOLO("best.pt")  # Ganti path model sesuai punyamu
+
+# Fungsi prediksi
+def predict_image(model, image):
+    image = np.array(image.convert("RGB"))
+    results = model(image)
+    return results
+
+# Warna bounding box
+label_to_color = {
+    "Masak": Color.RED,
+    "Mengkal": Color.YELLOW,
+    "Mentah": Color.BLACK
+}
+
+label_annotator = LabelAnnotator()
+
+# Gambar hasil deteksi
+def draw_results(image, results):
+    img = np.array(image.convert("RGB"))
+    class_counts = Counter()
+
+    for result in results:
+        boxes = result.boxes
+        names = result.names
+
+        xyxy = boxes.xyxy.cpu().numpy()
+        class_ids = boxes.cls.cpu().numpy().astype(int)
+        confidences = boxes.conf.cpu().numpy()
+
+        for box, class_id, conf in zip(xyxy, class_ids, confidences):
+            class_name = names[class_id]
+            label = f"{class_name}: {conf:.2f}"
+            color = label_to_color.get(class_name, Color.WHITE)
+
+            class_counts[class_name] += 1
+
+            box_annotator = BoxAnnotator(color=color)
+            detection = Detections(
+                xyxy=np.array([box]),
+                confidence=np.array([conf]),
+                class_id=np.array([class_id])
+            )
+
+            img = box_annotator.annotate(scene=img, detections=detection)
+            img = label_annotator.annotate(scene=img, detections=detection, labels=[label])
+
+    return img, class_counts
+
+# Fungsi download image
+def get_image_download_link(img_array):
+    pil_img = Image.fromarray(img_array)
+    buffer = BytesIO()
+    pil_img.save(buffer, format="PNG")
+    buffer.seek(0)
+    b64 = base64.b64encode(buffer.read()).decode()
+    href = f'<a href="data:file/png;base64,{b64}" download="hasil_deteksi.png">📥 Download Gambar Hasil Deteksi</a>'
+    return href
+
+# Inisialisasi state kamera
+if "camera_image" not in st.session_state:
+    st.session_state["camera_image"] = ""
+
+# Judul
+st.title("📷 Deteksi dan Klasifikasi Kematangan Buah Sawit")
+
 col1, col2 = st.columns([1, 2])  # Kiri untuk kontrol, kanan untuk input dan hasil
 
 with col1:
