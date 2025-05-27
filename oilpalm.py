@@ -6,18 +6,24 @@ from collections import Counter
 from ultralytics import YOLO
 from supervision import BoxAnnotator, LabelAnnotator, Color, Detections
 from io import BytesIO
+import base64
 
 # Konfigurasi halaman
 st.set_page_config(page_title="Deteksi Buah Sawit", layout="wide")
 
-# Load model YOLO
+def image_to_base64(img: Image.Image) -> str:
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    img_bytes = buffered.getvalue()
+    img_b64 = base64.b64encode(img_bytes).decode()
+    return img_b64
+
 @st.cache_resource
 def load_model():
     return YOLO("best.pt")  # Ganti dengan path model kamu
 
 model = load_model()
 
-# Warna label
 label_to_color = {
     "Masak": Color.RED,
     "Mengkal": Color.YELLOW,
@@ -25,7 +31,6 @@ label_to_color = {
 }
 label_annotator = LabelAnnotator()
 
-# Fungsi anotasi
 def draw_results(image, results):
     img = np.array(image.convert("RGB"))
     class_counts = Counter()
@@ -57,13 +62,11 @@ def draw_results(image, results):
 
     return Image.fromarray(img), class_counts
 
-# Sidebar
 with st.sidebar:
     st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
     st.image("logo-saraswanti.png", width=150)
     st.markdown("</div>", unsafe_allow_html=True)
     
-    # Judul dan radio input metode
     st.markdown(
         """
         <h4 style='margin-bottom: 5px;'>Pilih metode input gambar:</h4>
@@ -87,8 +90,6 @@ with st.sidebar:
         if camera_photo is not None:
             image = Image.open(camera_photo)
 
-
-# Judul dan deskripsi
 st.markdown("<h1 style='text-align:center;'>🌴 Deteksi dan Klasifikasi Kematangan Buah Sawit</h1>", unsafe_allow_html=True)
 
 st.markdown("""
@@ -99,10 +100,11 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Tambahkan jarak sebelum hasil deteksi
 st.markdown("<div style='margin-top:30px;'></div>", unsafe_allow_html=True)
 
-# Jika ada gambar input
+# Load gambar profil lokal (pastikan file 'foto.png' ada di folder yang sama)
+profile_img = Image.open("foto.png")
+
 if image:
     with st.spinner("🔍 Memproses gambar..."):
         results = model(image)
@@ -118,11 +120,48 @@ if image:
             st.markdown("### 📊 Hasil Deteksi")
             st.image(result_img, use_container_width=True)
 
+            # Embed gambar profil dan teks "Created by"
+            st.markdown(
+                f"""
+                <style>
+                .profile-container {{
+                    position: relative;
+                    width: 100%;
+                    height: 150px;
+                    margin-top: 10px;
+                }}
+                .profile-img {{
+                    position: absolute;
+                    bottom: 10px;
+                    right: 10px;
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    border: 2px solid #444;
+                    object-fit: cover;
+                }}
+                .profile-text {{
+                    position: absolute;
+                    bottom: 20px;
+                    right: 80px;
+                    font-size: 12px;
+                    color: #666;
+                    font-style: italic;
+                    user-select: none;
+                }}
+                </style>
+                <div class="profile-container">
+                    <img class="profile-img" src="data:image/png;base64,{image_to_base64(profile_img)}" />
+                    <div class="profile-text">Created by : hawa tercipta di dunia</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
         st.subheader("Jumlah Objek Terdeteksi:")
         for name, count in class_counts.items():
             st.write(f"- **{name}**: {count}")
 
-        # Tombol download hasil
         buffered = BytesIO()
         result_img.save(buffered, format="PNG")
         img_bytes = buffered.getvalue()
@@ -134,7 +173,6 @@ if image:
             mime="image/png"
         )
 
-# Jika belum ada gambar input, beri jarak dan tampilkan info
 else:
     st.markdown("<div style='margin-top:30px;'></div>", unsafe_allow_html=True)
     st.info("Silakan unggah gambar atau ambil foto dengan kamera untuk memulai deteksi.")
