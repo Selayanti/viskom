@@ -11,7 +11,7 @@ from supervision import BoxAnnotator, LabelAnnotator, Color, Detections
 st.set_page_config(page_title="Deteksi Buah Sawit", layout="wide")
 
 # Load gambar header dari GitHub
-header_url = "https://raw.githubusercontent.com/username/repo/main/Buah-Kelapa-Sawit.jpg"  # Ganti dengan URL asli file di GitHub kamu
+header_url = "https://github.com/Selayanti/viskom/blob/main/Buah-Kelapa-Sawit.jpg"  # Ganti dengan URL asli file di GitHub kamu
 response = requests.get(header_url)
 header_img = Image.open(BytesIO(response.content))
 
