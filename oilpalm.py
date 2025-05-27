@@ -99,6 +99,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# Tambahkan jarak sebelum hasil deteksi
+st.markdown("<div style='margin-top:30px;'></div>", unsafe_allow_html=True)
+
 # Jika ada gambar input
 if image:
     with st.spinner("🔍 Memproses gambar..."):
@@ -130,6 +133,8 @@ if image:
             file_name="hasil_deteksi.png",
             mime="image/png"
         )
+
+# Jika belum ada gambar input, beri jarak dan tampilkan info
 else:
-    st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:30px;'></div>", unsafe_allow_html=True)
     st.info("Silakan unggah gambar atau ambil foto dengan kamera untuk memulai deteksi.")
