@@ -63,25 +63,26 @@ with st.sidebar:
     st.image("logo-saraswanti.png", width=150)
     st.markdown("</div>", unsafe_allow_html=True)
     
+    # Judul dan radio input metode
     st.markdown(
         """
-        <div style="margin-top:20px;">
-            <h4>Pilih metode input gambar:</h4>
-        </div>
+        <h4 style='margin-bottom: 5px;'>Pilih metode input gambar:</h4>
         """, 
         unsafe_allow_html=True
     )
+
+    option = st.radio("", ["Upload Gambar", "Gunakan Kamera"], label_visibility="collapsed")
+
     image = None
-    option = st.radio("", ["Upload Gambar", "Gunakan Kamera"])
 
     if option == "Upload Gambar":
-        st.markdown("<p style='font-size:16px; font-weight:bold;'>Unggah gambar</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size:16px; font-weight:bold; margin-bottom: 5px;'>Unggah gambar</p>", unsafe_allow_html=True)
         uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"])
         if uploaded_file:
             image = Image.open(uploaded_file)
-            
+
     elif option == "Gunakan Kamera":
-        st.markdown("<p style='font-size:16px; font-weight:bold;'>Ambil gambar dengan kamera</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size:16px; font-weight:bold; margin-bottom: 5px;'>Ambil gambar dengan kamera</p>", unsafe_allow_html=True)
         camera_photo = st.camera_input("")
         if camera_photo is not None:
             image = Image.open(camera_photo)
