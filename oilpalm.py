@@ -8,22 +8,13 @@ from io import BytesIO
 from ultralytics import YOLO
 from supervision import BoxAnnotator, LabelAnnotator, Color, Detections
 
-# === CSS untuk background putih ===
-st.markdown("""
-    <style>
-        body, .stApp, .main, .block-container {
-            background-color: white !important;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 # === Konfigurasi halaman ===
 st.set_page_config(page_title="Deteksi Buah Sawit", layout="wide")
 
 # === Load model ===
 @st.cache_resource
 def load_model():
-    return YOLO("best.pt")  # Ganti path model sesuai milik Anda
+    return YOLO("best.pt")  # Ganti path jika perlu
 
 # === Fungsi prediksi ===
 def predict_image(model, image):
