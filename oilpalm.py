@@ -125,7 +125,7 @@ if image:
         img_bytes = buffered.getvalue()
 
         st.download_button(
-            label="⬇️ Download Gambar Berlabel",
+            label="⬇️ Download Gambar Hasil Deteksi",
             data=img_bytes,
             file_name="hasil_deteksi.png",
             mime="image/png"
