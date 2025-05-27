@@ -8,30 +8,38 @@ from io import BytesIO
 from ultralytics import YOLO
 from supervision import BoxAnnotator, LabelAnnotator, Color, Detections
 
-# Konfigurasi halaman
+# === CSS untuk background putih ===
+st.markdown("""
+    <style>
+        body, .stApp, .main, .block-container {
+            background-color: white !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# === Konfigurasi halaman ===
 st.set_page_config(page_title="Deteksi Buah Sawit", layout="wide")
 
-# Load model
+# === Load model ===
 @st.cache_resource
 def load_model():
-    return YOLO("best.pt")  # Ganti path model sesuai punyamu
+    return YOLO("best.pt")  # Ganti path model sesuai milik Anda
 
-# Fungsi prediksi
+# === Fungsi prediksi ===
 def predict_image(model, image):
     image = np.array(image.convert("RGB"))
     results = model(image)
     return results
 
-# Warna bounding box
+# === Warna bounding box sesuai label ===
 label_to_color = {
     "Masak": Color.RED,
     "Mengkal": Color.YELLOW,
     "Mentah": Color.BLACK
 }
-
 label_annotator = LabelAnnotator()
 
-# Gambar hasil deteksi
+# === Gambar hasil deteksi ===
 def draw_results(image, results):
     img = np.array(image.convert("RGB"))
     class_counts = Counter()
@@ -61,43 +69,30 @@ def draw_results(image, results):
             img = box_annotator.annotate(scene=img, detections=detection)
             img = label_annotator.annotate(scene=img, detections=detection, labels=[label])
 
-    return img, class_counts
+    return Image.fromarray(img), class_counts
 
-# Fungsi download image
-def get_image_download_link(img_array):
-    pil_img = Image.fromarray(img_array)
-    buffer = BytesIO()
-    pil_img.save(buffer, format="PNG")
-    buffer.seek(0)
-    b64 = base64.b64encode(buffer.read()).decode()
-    href = f'<a href="data:file/png;base64,{b64}" download="hasil_deteksi.png">📥 Download Gambar Hasil Deteksi</a>'
-    return href
-
-# Inisialisasi state kamera
+# === Inisialisasi kamera ===
 if "camera_image" not in st.session_state:
     st.session_state["camera_image"] = ""
 
-# Judul
-st.title("📷 Deteksi dan Klasifikasi Kematangan Buah Sawit")
-
-col1, col2 = st.columns([1, 2])  # Kiri untuk kontrol, kanan untuk input dan hasil
+# === Layout dua kolom ===
+col1, col2 = st.columns([1, 2])
 
 with col1:
-    st.image("logo-saraswanti.png", width=200)
+    st.image("logo-saraswanti.png", width=150)
+
     st.markdown("### Pilih metode input gambar:")
     option = st.radio("", ["Upload Gambar", "Gunakan Kamera"])
 
-with col2:
     image = None
 
     if option == "Upload Gambar":
-        uploaded_file = st.file_uploader("📂 Drag & drop gambar buah sawit di sini", type=["jpg", "jpeg", "png"])
+        uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "jpeg", "png"])
         if uploaded_file:
             image = Image.open(uploaded_file)
-            st.image(image, caption="Gambar yang diunggah", use_container_width=True)
 
     elif option == "Gunakan Kamera":
-        st.markdown("### Gunakan Kamera Belakang (Environment)")
+        st.markdown("### Kamera Belakang (Environment)")
 
         camera_html = """
         <div style="text-align:center;">
@@ -140,31 +135,43 @@ with col2:
             document.addEventListener("DOMContentLoaded", startCamera);
         </script>
         """
-        st.components.v1.html(camera_html, height=600)
-        base64_img = st.text_input("Gambar dari Kamera (tersembunyi)", type="default", label_visibility="collapsed")
 
+        st.components.v1.html(camera_html, height=600)
+
+        base64_img = st.text_input("Gambar dari Kamera (tersembunyi)", type="default", label_visibility="collapsed")
         if base64_img.startswith("data:image"):
             st.session_state["camera_image"] = base64_img
             try:
                 header, encoded = base64_img.split(",", 1)
                 decoded = base64.b64decode(encoded)
                 image = Image.open(BytesIO(decoded))
-                st.image(image, caption="📷 Gambar dari Kamera", use_container_width=True)
             except Exception as e:
                 st.error(f"Gagal memproses gambar dari kamera: {e}")
 
-    # Proses Deteksi jika gambar tersedia
+with col2:
+    st.title("📷 Deteksi dan Klasifikasi Kematangan Buah Sawit")
+
     if image:
+        st.image(image, caption="🖼️ Gambar Input", use_container_width=True)
+
         with st.spinner("🔍 Memproses gambar..."):
             model = load_model()
             results = predict_image(model, image)
-            img_with_boxes, class_counts = draw_results(image, results)
+            result_img, class_counts = draw_results(image, results)
 
-            st.image(img_with_boxes, caption="📊 Hasil Deteksi", use_container_width=True)
-
+            st.image(result_img, caption="📊 Hasil Deteksi", use_container_width=True)
             st.subheader("Jumlah Objek Terdeteksi:")
             for name, count in class_counts.items():
                 st.write(f"- **{name}**: {count}")
 
-            # Tombol download
-            st.markdown(get_image_download_link(img_with_boxes), unsafe_allow_html=True)
+            # Download Button
+            buffered = BytesIO()
+            result_img.save(buffered, format="PNG")
+            img_bytes = buffered.getvalue()
+
+            st.download_button(
+                label="⬇️ Download Gambar Berlabel",
+                data=img_bytes,
+                file_name="hasil_deteksi.png",
+                mime="image/png"
+            )
