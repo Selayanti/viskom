@@ -59,7 +59,9 @@ def draw_results(image, results):
 
 # Sidebar
 with st.sidebar:
-    st.markdown("<div style='text-align:center;'><img src='https://raw.githubusercontent.com/username/repo/main/logo-saraswanti.png' width='150'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
+    st.image("logo-saraswanti.png", width=150)
+    st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown(
         """
